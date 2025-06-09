@@ -4,18 +4,21 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach; 
 
-import ar.edu.unahur.obj2.observer.Oferta;
 import ar.edu.unahur.obj2.observer.excepciones.OfertaSubastadorException;
 import ar.edu.unahur.obj2.observer.observadores.*;
+import ar.edu.unahur.obj2.observer.estrategias.*;
 
 class ProductoSubatadoTest {
 	Observable producto = new ProductoSubatado();
-	Observer gonzager = new Subastador("gonzager");
-	Observer diazdan = new Subastador("diazdan");
-	Observer martomau = new Subastador("martomau");
+	EstrategiaStrategy arriesgado = new Arriesgado();
+	EstrategiaStrategy conLimite = new ConLimite(30);
+	EstrategiaStrategy unico= new Unico();
+	Observer gonzager = new Subastador("gonzager",arriesgado);
+	Observer diazdan = new Subastador("diazdan", arriesgado);
+	Observer martomau = new Subastador("martomau", arriesgado);
 	
 	@BeforeEach
-	public void initEachTest(){
+	void initEachTest(){
 	  producto.reset();
 	  gonzager.reset();
 	  diazdan.reset();
@@ -23,12 +26,9 @@ class ProductoSubatadoTest {
 	  producto.agregarParticipante(gonzager);
 	  producto.agregarParticipante(martomau);
 	  
-	  gonzager.setObservado(producto);
-	  martomau.setObservado(producto);
-	  
-	  martomau.realizarOferta();
-	  gonzager.realizarOferta();
-	  martomau.realizarOferta();
+	  producto.agregarOferta(martomau.realizarOferta());
+	  producto.agregarOferta(gonzager.realizarOferta());
+	  producto.agregarOferta(martomau.realizarOferta());
 	}
 	
 	@Test
@@ -54,9 +54,35 @@ class ProductoSubatadoTest {
 	}
 	
 	@Test
-	void siDiazdanRealizaUnaOfertaSeLanzaUnaExcepcion() {
-		diazdan.setObservado(producto);
+	void siDiazdanRealizaUnaOfertaSeLanzaUnaExcepcion() {		
+		assertThrows(OfertaSubastadorException.class, () -> {producto.agregarOferta(diazdan.realizarOferta());});
+	}
+	
+	@Test
+	void siGonzagerCambiaSuEstrategiaAUnicoSoloPuedeOfertar1vez() {
+		gonzager.setEstrategia(unico);
+		producto.agregarOferta(gonzager.realizarOferta());
+		producto.agregarOferta(gonzager.realizarOferta());
+		producto.agregarOferta(gonzager.realizarOferta());
+		producto.agregarOferta(gonzager.realizarOferta());
+		producto.agregarOferta(gonzager.realizarOferta());
 		
-		assertThrows(OfertaSubastadorException.class, () -> {diazdan.realizarOferta();});
+		assertEquals(4,producto.cantOfertas());
+		assertEquals(40,gonzager.getUltimaOferta().getValor());
+		assertEquals(40,martomau.getUltimaOferta().getValor());
+	}
+	
+	@Test
+	void siMartomauCambiaSuEstrategiaAConLimiteCon30DeUmbralPuedeOfertarSolo1Vez() {
+		martomau.setEstrategia(conLimite);
+		producto.agregarOferta(martomau.realizarOferta());
+		producto.agregarOferta(martomau.realizarOferta());
+		producto.agregarOferta(martomau.realizarOferta());
+		producto.agregarOferta(martomau.realizarOferta());
+		producto.agregarOferta(martomau.realizarOferta());
+		
+		assertEquals(4,producto.cantOfertas());
+		assertEquals(40,gonzager.getUltimaOferta().getValor());
+		assertEquals(40,martomau.getUltimaOferta().getValor());
 	}
 }

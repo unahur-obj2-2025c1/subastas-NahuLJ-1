@@ -1,19 +1,19 @@
 package ar.edu.unahur.obj2.observer.observadores;
 
 import ar.edu.unahur.obj2.observer.Oferta;
-import ar.edu.unahur.obj2.observer.observables.Observable;
+import ar.edu.unahur.obj2.observer.estrategias.EstrategiaStrategy;
 
 public interface Observer {
 
 	void serNotificado(Oferta oferta);
 	
-	void realizarOferta();
+	Oferta realizarOferta();
 	
 	String getNombre();
 	
 	void reset();
 	
-	void setObservado(Observable observable);
-	
 	Oferta getUltimaOferta();
+	
+	void setEstrategia(EstrategiaStrategy estrategia);
 }
