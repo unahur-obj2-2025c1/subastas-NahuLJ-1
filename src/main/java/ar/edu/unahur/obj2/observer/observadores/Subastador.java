@@ -2,7 +2,7 @@ package ar.edu.unahur.obj2.observer.observadores;
 
 import ar.edu.unahur.obj2.observer.Oferta;
 import ar.edu.unahur.obj2.observer.estrategias.EstrategiaStrategy;
-
+//intento commit
 public class Subastador implements Observer {
 	private Oferta ultimaOferta;
 	private final String nombre;
